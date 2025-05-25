@@ -1,10 +1,9 @@
-console.log('Client script loaded');
 
+
+
+// Pong Game Client
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-
-const WS_PROTOCOL = location.protocol === 'https:' ? 'wss' : 'ws';
-const socket = new WebSocket(`${WS_PROTOCOL}://${location.host}`);
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 15;
@@ -13,25 +12,25 @@ const BALL_RADIUS = 10;
 let playerId = null;
 let paddleY = canvas.height / 2 - PADDLE_HEIGHT / 2;
 let opponentPaddleY = paddleY;
-let ball = { x: canvas.width/2, y: canvas.height/2 };
+let ball = { x: canvas.width / 2, y: canvas.height / 2 };
 
-socket.addEventListener('open', () => {
-  console.log('WebSocket connecté');
+
+const socket = io('http://localhost:3000'); // ne pas utiliser ws:// ici
+
+socket.on('connect', () => {
+  console.log('✅ Connected to server');
+  socket.emit('open', 'hello from client');
 });
 
-socket.addEventListener('message', (event) => {
-  const data = JSON.parse(event.data);
-
-  if(data.type === 'init') {
-    playerId = data.playerId;
-  }
-
-  if(data.type === 'state') {
-    paddleY = data.players[playerId]?.paddleY ?? paddleY;
-    opponentPaddleY = data.players[data.opponentId]?.paddleY ?? opponentPaddleY;
-    ball = data.ball;
-  }
+socket.on('open', (msg) => {
+  console.log('📩 Server replied:', msg);
 });
+
+socket.on('connect_error', (err) => {
+  console.error('❌ Connection error:', err);
+});
+
+
 
 function drawRect(x, y, w, h, color) {
   ctx.fillStyle = color;
@@ -49,7 +48,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Paddles
-  if(playerId === 'player1') {
+  if (playerId === 'player1') {
     drawRect(10, paddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
     drawRect(canvas.width - 10 - PADDLE_WIDTH, opponentPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
   } else {
@@ -62,9 +61,7 @@ function draw() {
 }
 
 function sendPaddlePosition(y) {
-  if(socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({ type: 'move', paddleY: y }));
-  }
+  socket.emit('move', { paddleY: y });
 }
 
 canvas.addEventListener('mousemove', (e) => {
