@@ -15,15 +15,14 @@ export class Player {
     this.height = 100; // Default height for the paddle
   }
 
-  move(dy: number, yMax: number): void {
-    this.y = dy;
-    // Ensure the player stays within the bounds
-    if (this.y < yMax) {
-      this.y = yMax;
-    }
-    if (this.y + this.height > yMax + this.height) {
-      this.y = yMax + this.height - this.height;
-    }
+    move(dy: number, yMin: number = 0, yMax: number = 500): void {
+      this.y = dy;
+      if (this.y < yMin) {
+          this.y = yMin;
+      }
+      if (this.y > yMax - this.height) {
+          this.y = yMax - this.height;
+      }
   }
 
   isCollidingWith(other: Ball): boolean {

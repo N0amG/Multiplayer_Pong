@@ -96,4 +96,23 @@ export class Game {
 			score: this.score,
 		};
 	}
+
+	gameEnd(reason: string = '') { // reason if a player disconnects
+		console.log(`Game ended: ${reason}`);
+		const winner = this.score.player1 > this.score.player2 ? 'player1' : this.score.player2 > this.score.player1 ? 'player2': 'égalité';
+		const finalScore = `${this.score.player1} - ${this.score.player2}`;
+		return {
+			winner,
+			finalScore,
+			reason,
+		};
+	}
+
+	getPlayers() {
+		return {
+			player1: this.player1 ? this.player1.getPosition() : null,
+			player2: this.player2 ? this.player2.getPosition() : null,
+		};
+	}
+
 }
