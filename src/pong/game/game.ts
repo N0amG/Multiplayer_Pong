@@ -5,12 +5,14 @@ export class Game {
 	player1: Player
 	player2: Player;
 	ball: Ball;
+	gameEnded : Boolean;
 	score: { player1: number; player2: number };
 	constructor(player1: Player, player2: Player) {
 		this.player1 = player1;
 		this.player2 = player2;
 		this.ball = new Ball(400 - 15, 250 - 15, 30, 30);
 		this.score = { player1: 0, player2: 0 };
+		 this.gameEnded = false; // Bind gameEnd to the current context
 	}
 	update() {
 		this.ball.move();
@@ -42,6 +44,9 @@ export class Game {
 		} else if (this.ball.x + this.ball.width >= 800) {
 			this.score.player1++;
 			this.resetBall();
+		}
+		if (this.score.player1 >= 10 || this.score.player2 >= 10) {
+			return this.gameEnd();
 		}
 	}
 	resetBall() {
@@ -99,6 +104,7 @@ export class Game {
 
 	gameEnd(reason: string = '') { // reason if a player disconnects
 		console.log(`Game ended: ${reason}`);
+		this.gameEnded = true;
 		const winner = this.score.player1 > this.score.player2 ? 'player1' : this.score.player2 > this.score.player1 ? 'player2': 'égalité';
 		const finalScore = `${this.score.player1} - ${this.score.player2}`;
 		return {

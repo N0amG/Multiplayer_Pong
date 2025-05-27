@@ -101,6 +101,16 @@ export class PongGateway {
             return;
         }
         this.game.update();
+        if (this.game.gameEnded) {
+            let data = this.game.gameEnd();
+            this.server.emit('gameEnded', {
+                message: data.reason,
+                winner: data.winner,
+                finalScore: data.finalScore,
+            });
+            this.game = null; // Détruire la partie
+            return;
+        }
         this.server.emit('gameUpdate', {
             players: {
                 player1: this.game.player1.getPosition(),
